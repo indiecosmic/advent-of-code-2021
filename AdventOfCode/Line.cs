@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.VisualBasic.CompilerServices;
 
 namespace AdventOfCode
 {
-    public struct Line
+    public readonly struct Line
     {
         public Point Start { get; }
         public Point End { get; }
@@ -19,27 +15,14 @@ namespace AdventOfCode
         }
 
         public bool IsParallel => Start.X != End.X && Start.Y != End.Y;
-    }
 
-    public struct Point
-    {
-        public int X { get; }
-        public int Y { get; }
-
-        public Point(int x, int y)
+        public static Line Parse(string row)
         {
-            X = x;
-            Y = y;
-        }
-
-        public static Point operator -(Point a, Point b) => new Point(a.X - b.X, a.Y - b.Y);
-        public static Point operator +(Point a, Point b) => new Point(a.X + b.X, a.Y + b.Y);
-        
-
-        public void Deconstruct(out int x, out int y)
-        {
-            x = X;
-            y = Y;
+            var points = row.Split("->", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(Point.Parse)
+                .ToArray();
+            
+            return new Line(points[0], points[1]);
         }
     }
 }
