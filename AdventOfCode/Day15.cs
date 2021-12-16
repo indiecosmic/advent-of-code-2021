@@ -5,8 +5,8 @@ namespace AdventOfCode
 {
     public class Day15
     {
-        private readonly int[,] map;
-        private readonly int[,] costs;
+        private int[,] map;
+        private int[,] costs;
         private readonly (int x, int y)[] directions = new[]
         {
             (x: 0, y: 1),
@@ -14,10 +14,10 @@ namespace AdventOfCode
             (x: 0, y: -1),
             (x: -1, y: 0)
         };
-        private readonly (int x, int y) destination;
-        private readonly int height;
-        private readonly int width;
-        
+        private (int x, int y) destination;
+        private int height;
+        private int width;
+
 
         public Day15(string[] input = null)
         {
@@ -34,7 +34,7 @@ namespace AdventOfCode
                     costs[col, row] = int.MaxValue;
                 }
             }
-            
+
             destination = (width - 1, height - 1);
         }
 
@@ -52,7 +52,8 @@ namespace AdventOfCode
                 {
                     var target = (x: next.x + dir.x, y: next.y + dir.y);
                     var cost = costs[next.x, next.y];
-                    if (IsValid(target.x, target.y, cost)) {
+                    if (IsValid(target.x, target.y, cost))
+                    {
                         visitingQueue.Enqueue((target.x, target.y));
                         costs[target.x, target.y] = cost + map[target.x, target.y];
                     }
@@ -64,7 +65,18 @@ namespace AdventOfCode
 
         public int Part2()
         {
-
+            map = CreateBigMap(map, 5);
+            height = map.GetLength(0);
+            width = map.GetLength(1);
+            costs = new int[width,height];
+            for (var row = 0; row < height; row++)
+            {
+                for (var col = 0; col < width; col++)
+                {
+                    costs[col, row] = int.MaxValue;
+                }
+            }
+            destination = (width - 1, height - 1);
 
             var visitingQueue = new Queue<(int x, int y)>();
             var source = (x: 0, y: 0);
@@ -89,20 +101,39 @@ namespace AdventOfCode
             return costs[destination.x, destination.y];
         }
 
-        private static int[,] CreateBigMap(int[,] map)
+        public static int[,] CreateBigMap(int[,] map, int multiplier)
         {
-            var height = map.GetLength(0) * 5;
-            var width = map.GetLength(1) * 5;
-            var copy = new int[map.GetLength(1), map.GetLength(0)];
+            var origHeight = map.GetLength(0);
+            var origWidth = map.GetLength(1);
 
+            var height = map.GetLength(0) * multiplier;
+            var width = map.GetLength(1) * multiplier;
+            var copy = new int[width, height];
 
+            for (var rowM = 0; rowM < multiplier; rowM++)
+            {
+                for (var colM = 0; colM < multiplier; colM++)
+                {
+                    for (var row = 0; row < origHeight; row++)
+                    {
+                        for (var col = 0; col < origWidth; col++)
+                        {
+                            var val = map[col, row] + rowM + colM;
+                            if (val > 9)
+                                val = val - 9;
 
-            return null;
+                            copy[col + colM * origWidth, row + rowM * origHeight] = val;
+                        }
+                    }
+                }
+            }
+
+            return copy;
         }
 
         private bool IsValid(int x, int y, int cost)
         {
-            if (x >= 0 && y >= 0 && x < width && y < height && cost+map[x,y] < costs[x, y])
+            if (x >= 0 && y >= 0 && x < width && y < height && cost + map[x, y] < costs[x, y])
                 return true;
             return false;
         }
